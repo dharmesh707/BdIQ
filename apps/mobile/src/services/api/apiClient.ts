@@ -1,7 +1,9 @@
 import axios from "axios";
 
+import { getToken } from "../auth/authStorage";
+
 const BASE_URL = __DEV__
-  ? "http://10.220.148.31:8000/api/v1"
+  ? process.env.EXPO_PUBLIC_API_URL || "http://172.30.178.31:8000/api/v1"
   : "https://your-deployed-backend.railway.app/api/v1";
 
 const apiClient = axios.create({
@@ -12,12 +14,29 @@ const apiClient = axios.create({
   },
 });
 
+// Automatically attach JWT if available
+apiClient.interceptors.request.use(
+  async (config) => {
+    const token = await getToken();
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+// Response interceptor
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const message =
       error.response?.data?.detail || error.message || "Something went wrong";
+
     console.error("[API Error]", message);
+
     return Promise.reject(new Error(message));
   },
 );
