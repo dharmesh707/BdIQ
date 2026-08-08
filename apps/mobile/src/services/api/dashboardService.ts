@@ -1,6 +1,6 @@
 import apiClient from "./apiClient";
 
-import { DashboardResponse } from "../../types/dashboard";
+import { DashboardResponse } from "../../types/dashboard"; // here is the error
 import { ProgressResponse } from "../../types/progress";
 
 export interface HistoryItem {

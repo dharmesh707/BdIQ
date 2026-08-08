@@ -1,8 +1,10 @@
-import { RefreshControl } from "react-native";
-import { ScrollView } from "react-native";
-import { Camera, BrainCircuit, Play } from "lucide-react-native";
-
+import { RefreshControl, ScrollView } from "react-native";
+import { Camera, BrainCircuit } from "lucide-react-native";
 import Screen from "../../components/layout/Screen";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/RootStack";
+
 import Header from "../../components/layout/Header";
 import SectionTitle from "../../components/ui/SectionTitle/SectionTitle";
 
@@ -15,24 +17,21 @@ import TrainingCard from "../../components/cards/TrainingCard/TrainingCard";
 import ActionCard from "../../components/cards/ActionCard/ActionCard";
 import LoadingCard from "../../components/cards/LoadingCard/LoadingCard";
 import ErrorCard from "../../components/cards/ErrorCard/ErrorCard";
+import AuthRequiredCard from "../../components/auth/AuthRequiredCard";
 
 import { useDashboard } from "../../hooks/useDashboard";
 import { useHistory } from "../../hooks/useHistory";
 import { useTodayTraining } from "../../hooks/useTraining";
-
-import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../../hooks/useAuth";
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function HomeScreen() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NavigationProp>();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const dashboard = useDashboard();
   const history = useHistory();
   const training = useTodayTraining();
-
-  const loading =
-    dashboard.isPending || history.isPending || training.isPending;
-
-  const error = dashboard.error || history.error || training.error;
 
   async function refresh() {
     await Promise.all([
@@ -41,6 +40,73 @@ export default function HomeScreen() {
       training.refetch(),
     ]);
   }
+
+  // ------------------------
+  // AUTH LOADING
+  // ------------------------
+
+  if (authLoading) {
+    return (
+      <Screen>
+        <Header title="BadmintonIQ" subtitle="Loading..." />
+
+        <LoadingCard />
+      </Screen>
+    );
+  }
+
+  // ------------------------
+  // GUEST MODE
+  // ------------------------
+
+  if (!isAuthenticated) {
+    return (
+      <Screen>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Header
+            title="Welcome to BadmintonIQ"
+            subtitle="Your AI-powered badminton coach."
+          />
+
+          <AuthRequiredCard
+            title="Unlock Your AI Coach"
+            description="Create your free account to analyze strokes, receive AI coaching, track your progress, unlock personalized training, and build your badminton profile."
+          />
+
+          <SectionTitle title="Quick Actions" />
+
+          <ActionCard
+            title="Analyze Stroke"
+            subtitle="Upload or record your badminton stroke"
+            buttonText="Sign In"
+            icon={<Camera size={24} color="#FFF" />}
+            onPress={() => navigation.navigate("Login")}
+          />
+
+          <ActionCard
+            title="Train Like a Pro"
+            subtitle="Personalized AI coaching"
+            buttonText="Create Account"
+            icon={<BrainCircuit size={24} color="#FFF" />}
+            onPress={() => navigation.navigate("Register")}
+          />
+
+          <SectionTitle title="AI Coach" />
+
+          <CoachCard advice="Your dashboard will unlock personalized coaching, skill tracking, weekly progress, stroke history, and AI-powered badminton recommendations." />
+        </ScrollView>
+      </Screen>
+    );
+  }
+
+  // ------------------------
+  // LOGGED IN
+  // ------------------------
+
+  const loading =
+    dashboard.isPending || history.isPending || training.isPending;
+
+  const error = dashboard.error || history.error || training.error;
 
   if (loading) {
     return (
@@ -73,7 +139,14 @@ export default function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={false} onRefresh={refresh} />
+          <RefreshControl
+            refreshing={
+              dashboard.isRefetching ||
+              history.isRefetching ||
+              training.isRefetching
+            }
+            onRefresh={refresh}
+          />
         }
       >
         <Header
@@ -112,6 +185,7 @@ export default function HomeScreen() {
           netPlay={dashboardData.skillBreakdown.netPlay}
           footwork={dashboardData.skillBreakdown.footwork}
         />
+
         <SectionTitle title="Quick Actions" />
 
         <ActionCard
@@ -126,7 +200,7 @@ export default function HomeScreen() {
           title="Start AI Training"
           subtitle="Today's personalized drills"
           buttonText="Train"
-          icon={<Play size={24} color="#FFF" />}
+          icon={<BrainCircuit size={24} color="#FFF" />}
           onPress={() => navigation.navigate("Training")}
         />
 

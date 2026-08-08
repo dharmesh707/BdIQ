@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack"; // here is the error
 
 import Screen from "../../components/layout/Screen";
 import Header from "../../components/layout/Header";
@@ -13,17 +13,26 @@ import SupportedShotsCard from "../../components/cards/SupportedShotsCard/Suppor
 import { uploadVideo } from "../../services/camera/cameraService";
 
 import { RootStackParamList } from "../../navigation/RootStack";
+import { useAuth } from "../../hooks/useAuth";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function AnalyzeScreen() {
   const navigation = useNavigation<NavigationProp>();
-
+  const { isAuthenticated, setPendingVideoId } = useAuth();
   async function handleUpload() {
     try {
       const response = await uploadVideo();
 
       if (!response) {
+        return;
+      }
+
+      if (!isAuthenticated) {
+        setPendingVideoId(response.video_id);
+
+        navigation.navigate("Login");
+
         return;
       }
 

@@ -1,12 +1,18 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack"; // here is the error
 
 import BottomTabNavigator from "./BottomTabNavigator";
 
 import ProcessingScreen from "../screens/Processing/ProcessingScreen";
 import AnalysisResultScreen from "../screens/Result/AnalysisResultScreen";
+import LoginScreen from "../screens/Auth/LoginScreen";
+import RegisterScreen from "../screens/Auth/RegisterScreen";
 
 export type RootStackParamList = {
   Main: undefined;
+
+  Login: undefined;
+
+  Register: undefined;
 
   Processing: {
     videoId: string;
@@ -27,6 +33,10 @@ export default function RootStack() {
       }}
     >
       <Stack.Screen name="Main" component={BottomTabNavigator} />
+
+      <Stack.Screen name="Login" component={LoginScreen} />
+
+      <Stack.Screen name="Register" component={RegisterScreen} />
 
       <Stack.Screen name="Processing" component={ProcessingScreen} />
 

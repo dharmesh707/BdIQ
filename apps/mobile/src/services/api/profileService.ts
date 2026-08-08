@@ -1,4 +1,4 @@
-import { DashboardResponse } from "../../types/dashboard";
+import { DashboardResponse } from "../../types/dashboard"; // here is the error
 import { ProgressResponse } from "../../types/progress";
 import apiClient from "./apiClient";
 

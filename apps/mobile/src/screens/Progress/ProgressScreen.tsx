@@ -11,14 +11,46 @@ import CoachCard from "../../components/cards/CoachCard/CoachCard";
 import AchievementCard from "../../components/cards/AchievementCard/AchievementCard";
 import LoadingCard from "../../components/cards/LoadingCard/LoadingCard";
 import ErrorCard from "../../components/cards/ErrorCard/ErrorCard";
+import AuthRequiredCard from "../../components/auth/AuthRequiredCard";
 
-import { useDashboard, useProgress } from "../../hooks/useDashboard";
+import { useDashboard } from "../../hooks/useDashboard";
+import { useProgress } from "../../hooks/useProgress";
 import { useTodayTraining } from "../../hooks/useTraining";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function ProgressScreen() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
+
   const dashboard = useDashboard();
   const progress = useProgress();
   const training = useTodayTraining();
+
+  if (authLoading) {
+    return (
+      <Screen>
+        <Header title="Progress" subtitle="Checking account..." />
+
+        <LoadingCard />
+      </Screen>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Screen>
+        <Header title="Progress" subtitle="Track your badminton journey." />
+
+        <AuthRequiredCard
+          title="Unlock Performance Analytics"
+          description="Sign in to view AI-generated skill graphs, weekly improvements, achievements, training summaries, and detailed performance insights."
+        />
+
+        <SectionTitle title="What You'll Unlock" />
+
+        <CoachCard advice="Your dashboard will include weekly trends, skill breakdowns, consistency tracking, AI coaching insights, and achievement milestones." />
+      </Screen>
+    );
+  }
 
   if (dashboard.isPending || progress.isPending || training.isPending) {
     return (

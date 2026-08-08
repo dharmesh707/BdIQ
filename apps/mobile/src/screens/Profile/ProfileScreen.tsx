@@ -8,13 +8,45 @@ import ErrorCard from "../../components/cards/ErrorCard/ErrorCard";
 import ProfileHeaderCard from "../../components/cards/ProfileHeaderCard/ProfileHeaderCard";
 import PlayerLevelCard from "../../components/cards/PlayerLevelCard/PlayerLevelCard";
 import ProfileStatisticCard from "../../components/cards/ProfileStatisticCard/ProfileStatisticCard";
-import SettingsCard from "../../components/cards/SettingsCard/SettingsCard";
+import SettingsCard from "../../components/cards/SettingsCard/SettingsCard"; //here is the error
 import AboutCard from "../../components/cards/AboutCard/AboutCard";
 
 import { useProfile } from "../../hooks/useProfile";
+import { useAuth } from "../../hooks/useAuth";
+import AuthRequiredCard from "../../components/auth/AuthRequiredCard";
 
 export default function ProfileScreen() {
+  const { isAuthenticated, loading } = useAuth();
+
   const { data, isPending, error } = useProfile();
+  if (loading) {
+    return (
+      <Screen>
+        <Header title="Profile" subtitle="Checking account..." />
+        <LoadingCard />
+      </Screen>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Screen>
+        <Header
+          title="Profile"
+          subtitle="Sign in to unlock your badminton profile."
+        />
+
+        <AuthRequiredCard
+          title="Create Your Player Profile"
+          description="Save your analyses, unlock AI coaching, training history, streaks and personalized statistics."
+        />
+
+        <SectionTitle title="About BadmintonIQ" />
+
+        <AboutCard />
+      </Screen>
+    );
+  }
 
   if (isPending) {
     return (

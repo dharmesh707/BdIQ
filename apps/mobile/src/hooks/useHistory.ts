@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getHistory } from "../services/api/dashboardService";
+import { useAuth } from "./useAuth";
+
+import { getHistory, HistoryItem } from "../services/api/dashboardService";
 
 export function useHistory() {
-  return useQuery({
-    queryKey: ["history"],
+  const { isAuthenticated } = useAuth();
 
+  return useQuery<HistoryItem[]>({
+    queryKey: ["history"],
     queryFn: getHistory,
+    enabled: isAuthenticated,
   });
 }
